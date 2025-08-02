@@ -47,7 +47,7 @@ public sealed class UnitOfWork : IUnitOfWork
             env => writeFactory(env)
         ).ToFrozenDictionary();
 
-        _logger.LogInformation("Transaction started for event ingestion");
+        _logger.LogInformation("Transaction started for message broadcasting");
     }
 
     /// <summary>
