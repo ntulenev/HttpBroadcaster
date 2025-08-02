@@ -4,6 +4,8 @@ using Logic;
 
 using Microsoft.EntityFrameworkCore;
 
+using Serilog;
+
 using Storage;
 using Storage.Configuration;
 
@@ -27,6 +29,9 @@ builder.Services.AddDbContext<MultiOutboxDbContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("MainDb");
     _ = options.UseNpgsql(connectionString);
 });
+
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration));
 
 var app = builder.Build();
 
