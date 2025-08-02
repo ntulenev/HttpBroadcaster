@@ -27,7 +27,7 @@ public sealed class InboundMessage
     /// <param name="id">The unique identifier of the message.</param>
     /// <param name="payload">The message payload.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="id"/> or <paramref name="payload"/> is null.</exception>
-    public InboundMessage(MessageId id, MessagePayload payload)
+    private InboundMessage(MessageId id, MessagePayload payload)
     {
         ArgumentNullException.ThrowIfNull(id);
         ArgumentNullException.ThrowIfNull(payload);
@@ -35,5 +35,19 @@ public sealed class InboundMessage
         Id = id;
         Payload = payload;
         CreatedAt = DateTimeOffset.UtcNow;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InboundEvent"/> class.
+    /// </summary>
+    /// <param name="payload">The JSON payload.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if <paramref name="type"/> or <paramref name="payload"/> is null, empty, or whitespace.
+    /// </exception>
+    public static InboundMessage CreateNew(string payload)
+    {
+        var messagePayload = new MessagePayload(payload);
+        var id = new MessageId(Guid.NewGuid());
+        return new InboundMessage(id, messagePayload);
     }
 }
