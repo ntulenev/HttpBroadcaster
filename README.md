@@ -4,7 +4,7 @@ Message broadcaster that receives HTTP POSTs and atomically dispatches messages 
 ```mermaid
 flowchart TD
     subgraph Client
-        A[POST /event]
+        A[POST /api/messages]
     end
 
     subgraph API
