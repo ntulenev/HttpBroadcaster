@@ -5,7 +5,7 @@ namespace Abstractions;
 /// <summary>
 /// Defines a contract for broadcasting an inbound message to all configured outbox environments.
 /// </summary>
-internal interface IBroadcastingHandler
+public interface IBroadcastingHandler
 {
     /// <summary>
     /// Broadcasts the given inbound message by writing it to all configured outbox writers.
