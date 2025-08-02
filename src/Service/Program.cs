@@ -1,9 +1,32 @@
 using Abstractions;
 
+using Logic;
+
+using Microsoft.EntityFrameworkCore;
+
+using Storage;
+using Storage.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
+builder.Services
+    .AddOptions<UnitOfWorkConfiguration>()
+    .Bind(builder.Configuration.GetSection("UnitOfWorkConfiguration"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddScoped<IBroadcastingHandler, BroadcastingHandler>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<Func<Models.Environment, IOutboxWriter>>(sp =>
+    env => ActivatorUtilities.CreateInstance<OutboxWriter>(sp, env));
+
+builder.Services.AddDbContext<MultiOutboxDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("MainDb");
+    _ = options.UseNpgsql(connectionString);
+});
 
 var app = builder.Build();
 
