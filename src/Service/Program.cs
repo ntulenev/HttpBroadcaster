@@ -18,7 +18,13 @@ app.MapPost("api/messages", async (
     Transport.InboundMessage message,
     CancellationToken ct) =>
 {
+
+    using var _ = app.Logger.BeginScope("RequestId: {RequestId}", Guid.NewGuid());
+
     await Task.Delay(100, ct);
+
+    app.Logger.LogInformation("Message processed successfully");
+
     return Results.Ok();
 });
 
