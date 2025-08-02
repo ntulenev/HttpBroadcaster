@@ -1,0 +1,19 @@
+-- Migration: Create Outbox Tables for DEV, STAGE, and PROD
+
+CREATE TABLE IF NOT EXISTS outbox_DEV (
+    Id UUID PRIMARY KEY,
+    Payload TEXT NOT NULL,
+    CreatedAt TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS outbox_STAGE (
+    Id UUID PRIMARY KEY,
+    Payload TEXT NOT NULL,
+    CreatedAt TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS outbox_PROD (
+    Id UUID PRIMARY KEY,
+    Payload TEXT NOT NULL,
+    CreatedAt TIMESTAMPTZ NOT NULL
+);
