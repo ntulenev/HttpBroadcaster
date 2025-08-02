@@ -8,10 +8,10 @@ flowchart TD
     end
 
     subgraph API
-        B[EventsController]
-        C[EventIngestionService]
-        D[UnitOfWorkFactory]
-        E[UnitOfWork]
+        B[MessagesController]
+        C[BroadcastingHandler]
+        D[UnitOfWork]
+        E[OutboxWriters]
     end
 
     subgraph Database
@@ -41,4 +41,42 @@ These services are responsible for:
 For a practical example of an outbox consumer, see:  
 👉 [**ntulenev/SimpleTransactionalOutbox**](https://github.com/ntulenev/SimpleTransactionalOutbox)
 
+## 🛠 Setup Instructions
 
+To run this project, you need to configure the list of environments and ensure that corresponding outbox tables exist in your PostgreSQL database.
+
+### 1. Configure `appsettings.json`
+
+Specify the environments that the broadcaster should write to:
+
+```json
+{
+  "UnitOfWorkConfiguration": {
+    "OutboxEnvironments": [ "DEV", "STAGE", "PROD" ]
+  }
+}
+```
+
+Each environment will correspond to a physical table named outbox_{ENV}.
+
+### 2. Create Outbox Tables
+
+For each environment, you must manually create an outbox table in your database.
+
+Example for `PROD`:
+
+```sql
+CREATE TABLE IF NOT EXISTS outbox_PROD (
+    Id UUID PRIMARY KEY,
+    Payload TEXT NOT NULL,
+    CreatedAt TIMESTAMPTZ NOT NULL
+);
+```
+
+You can find the initial migration script in:
+```
+HttpBroadcaster/src/Migration/001_Create_Outbox_Tables.sql
+```
+
+## 🚀 Example of usage
+![Example](Example.png)
