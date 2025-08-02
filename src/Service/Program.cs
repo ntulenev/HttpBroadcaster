@@ -1,3 +1,5 @@
+using Abstractions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
@@ -16,12 +18,13 @@ app.MapHealthChecks("/hc");
 
 app.MapPost("api/messages", async (
     Transport.InboundMessage message,
+    IBroadcastingHandler handler,
     CancellationToken ct) =>
 {
 
     using var _ = app.Logger.BeginScope("RequestId: {RequestId}", Guid.NewGuid());
 
-    await Task.Delay(100, ct);
+    await handler.BroadcastAsync(Models.InboundMessage.CreateNew(message.Payload.ToString()), ct);
 
     app.Logger.LogInformation("Message processed successfully");
 
