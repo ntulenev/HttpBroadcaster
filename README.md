@@ -4,7 +4,7 @@ Message broadcaster that receives HTTP POSTs and atomically dispatches messages 
 ```mermaid
 flowchart TD
     subgraph Client
-        A[POST /event]
+        A[POST /api/messages]
     end
 
     subgraph API
@@ -15,9 +15,9 @@ flowchart TD
     end
 
     subgraph Database
-        F1[Outbox Table: outbox_prod]
-        F2[Outbox Table: outbox_staging]
-        F3[Outbox Table: outbox_env_n]
+        F1[Outbox Table: outbox_PROD]
+        F2[Outbox Table: outbox_STAGE]
+        F3[Outbox Table: outbox_ENV_N]
     end
 
     A --> B --> C --> D --> E
@@ -28,7 +28,7 @@ flowchart TD
 
 ## ℹ️ Outbox Table Processing
 
-Each `outbox_{env}` table is intended to be processed by a **dedicated outbox consumer service**.  
+Each `outbox_{ENV}` table is intended to be processed by a **dedicated outbox consumer service**.  
 These services are responsible for:
 
 - Reading pending events from the corresponding outbox table
@@ -57,7 +57,7 @@ Specify the environments that the broadcaster should write to:
 }
 ```
 
-Each environment will correspond to a physical table named outbox_{ENV}.
+Each environment will correspond to a physical table named `outbox_{ENV}`.
 
 ### 2. Create Outbox Tables
 
