@@ -1,7 +1,9 @@
 using System.Collections.Frozen;
+using System.Data;
 
 using Abstractions;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,7 +16,7 @@ namespace Storage;
 /// Implements the unit of work pattern for writing events to multiple outbox tables atomically.
 /// Each outbox is tied to a specific environment, and all writes are wrapped in a single transaction.
 /// </summary>
-public sealed class UnitOfWork : IUnitOfWork
+public sealed class UnitOfWork<TContext> : IUnitOfWork where TContext : DbContext
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="UnitOfWork"/> class.
@@ -28,24 +30,24 @@ public sealed class UnitOfWork : IUnitOfWork
     /// Thrown if any of the constructor parameters are null.
     /// </exception>
     public UnitOfWork(
-        MultiOutboxDbContext db,
+        TContext db,
         IOptions<UnitOfWorkConfiguration> config,
         Func<Models.Environment, IOutboxWriter> writeFactory,
-        ILogger<UnitOfWork> logger)
+        ILogger<UnitOfWork<TContext>> logger)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(writeFactory);
         ArgumentNullException.ThrowIfNull(logger);
 
-        _db = db;
-        _transaction = _db.Database.BeginTransaction();
         _logger = logger;
-
+        _context = db;
         _writers = config.Value.GetEnvironments().ToDictionary(
             env => env,
             env => writeFactory(env)
         ).ToFrozenDictionary();
+
+        _transaction = db.Database.BeginTransaction(IsolationLevel.ReadCommitted);
 
         _logger.LogInformation("Transaction started for message broadcasting");
     }
@@ -65,7 +67,7 @@ public sealed class UnitOfWork : IUnitOfWork
         cancellationToken.ThrowIfCancellationRequested();
 
         _logger.LogInformation("Saving changes and committing transaction");
-        _ = await _db.SaveChangesAsync(cancellationToken);
+        _ = await _context.SaveChangesAsync(cancellationToken);
         await _transaction.CommitAsync(cancellationToken);
     }
 
@@ -79,8 +81,8 @@ public sealed class UnitOfWork : IUnitOfWork
         return _transaction.DisposeAsync();
     }
 
-    private readonly MultiOutboxDbContext _db;
     private readonly FrozenDictionary<Models.Environment, IOutboxWriter> _writers;
+    private readonly TContext _context;
     private readonly IDbContextTransaction _transaction;
     private readonly ILogger _logger;
 }

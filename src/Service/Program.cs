@@ -20,7 +20,7 @@ builder.Services
     .ValidateOnStart();
 
 builder.Services.AddScoped<IBroadcastingHandler, BroadcastingHandler>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork<MultiOutboxDbContext>>();
 builder.Services.AddScoped<Func<Models.Environment, IOutboxWriter>>(sp =>
     env => ActivatorUtilities.CreateInstance<OutboxWriter>(sp, env));
 
